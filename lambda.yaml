@@ -11,7 +11,6 @@ Globals:
             Fn::GetAtt:
             - AuthorizerLambda
             - Arn
-          ReauthorizeEverySeconds: 30
       DefaultAuthorizer: BasicAuthorizer
     Cors:
       AllowMethods: '''OPTIONS,GET,POST,PUT,PATCH,DELETE,HEAD'''
@@ -29,7 +28,7 @@ Resources:
     Properties:
       Handler: src/authorizer/index.handler
       Runtime: nodejs10.x
-      CodeUri: s3://my-sample-lambda-authorizer/d25ef3931b31401dbfda315b85a30aec
+      CodeUri: s3://my-sample-lambda-authorizer/26e2dc41c4be3d8193e1a85c45934910
       MemorySize: 512
       Timeout: 28
       Policies:
@@ -40,7 +39,7 @@ Resources:
     Properties:
       Handler: src/customers/index.handler
       Runtime: nodejs10.x
-      CodeUri: s3://my-sample-lambda-authorizer/d25ef3931b31401dbfda315b85a30aec
+      CodeUri: s3://my-sample-lambda-authorizer/26e2dc41c4be3d8193e1a85c45934910
       MemorySize: 512
       Timeout: 28
       Policies:
@@ -63,7 +62,7 @@ Resources:
     Properties:
       Handler: src/customers/index.handler
       Runtime: nodejs10.x
-      CodeUri: s3://my-sample-lambda-authorizer/d25ef3931b31401dbfda315b85a30aec
+      CodeUri: s3://my-sample-lambda-authorizer/26e2dc41c4be3d8193e1a85c45934910
       MemorySize: 512
       Timeout: 28
       Policies:

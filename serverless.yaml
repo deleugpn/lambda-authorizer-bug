@@ -9,7 +9,6 @@ Globals:
       Authorizers:
         BasicAuthorizer:
           FunctionArn: !GetAtt AuthorizerLambda.Arn
-          ReauthorizeEverySeconds: 30
       DefaultAuthorizer: BasicAuthorizer
     Cors:
       AllowMethods: "'OPTIONS,GET,POST,PUT,PATCH,DELETE,HEAD'"
