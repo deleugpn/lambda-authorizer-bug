@@ -19,7 +19,9 @@ exports.handler =  function(event, context, callback) {
 
   switch (token) {
     case 'allow':
-      callback(null, generatePolicy('user', 'Allow', event.methodArn));
+      let generatePolicy1 = generatePolicy('user', 'Allow', event.methodArn);
+      console.log(generatePolicy1);
+      callback(null, generatePolicy1);
       break;
     case 'deny':
       callback(null, generatePolicy('user', 'Deny', event.methodArn));
