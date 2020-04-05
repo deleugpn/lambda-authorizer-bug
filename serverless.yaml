@@ -9,17 +9,18 @@ Globals:
       Authorizers:
         BasicAuthorizer:
           FunctionArn: !GetAtt AuthorizerLambda.Arn
+          ReauthorizeEvery: 0
       DefaultAuthorizer: BasicAuthorizer
-    Cors:
-      AllowMethods: "'OPTIONS,GET,POST,PUT,PATCH,DELETE,HEAD'"
-      AllowHeaders: "'*'"
-      AllowOrigin:
-        Fn::Join:
-          - ''
-          - - "'https://app"
-            - ".customergauge.com"
-            - "'"
-      MaxAge: "'60'"
+#    Cors:
+#      AllowMethods: "'OPTIONS,GET,POST,PUT,PATCH,DELETE,HEAD'"
+#      AllowHeaders: "'*'"
+#      AllowOrigin:
+#        Fn::Join:
+#          - ''
+#          - - "'https://app"
+#            - ".customergauge.com"
+#            - "'"
+#      MaxAge: "'60'"
 
 Resources:
 
@@ -57,6 +58,30 @@ Resources:
           Type: Api
           Properties:
             Path: /customers/{proxy+}
+            Method: ANY
+
+  NewLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/customers/index.handler
+      Runtime: nodejs10.x
+      CodeUri: .
+      MemorySize: 512
+      Timeout: 28
+      Policies:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/AWSLambdaInvocation-DynamoDB
+        - arn:aws:iam::aws:policy/AWSLambdaExecute
+      Events:
+        NewResource:
+          Type: Api
+          Properties:
+            Path: /blah
+            Method: ANY
+        NewResourceWithProxy:
+          Type: Api
+          Properties:
+            Path: /blah/{proxy+}
             Method: ANY
 
   OrganizationsLambda:

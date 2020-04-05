@@ -7,21 +7,11 @@
 // Note that token values are case-sensitive.
 
 exports.handler =  function(event, context, callback) {
-  console.log('entered lambda authorizer');
-
   var token = event.authorizationToken;
-
-  console.log('token: ' + token);
-
   console.log(event.methodArn);
-
-  console.log(event);
-
   switch (token) {
     case 'allow':
-      let generatePolicy1 = generatePolicy('user', 'Allow', event.methodArn);
-      console.log(generatePolicy1);
-      callback(null, generatePolicy1);
+      callback(null, generatePolicy('user', 'Allow', event.methodArn));
       break;
     case 'deny':
       callback(null, generatePolicy('user', 'Deny', event.methodArn));

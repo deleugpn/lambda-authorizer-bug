@@ -11,24 +11,15 @@ Globals:
             Fn::GetAtt:
             - AuthorizerLambda
             - Arn
+          ReauthorizeEvery: 0
       DefaultAuthorizer: BasicAuthorizer
-    Cors:
-      AllowMethods: '''OPTIONS,GET,POST,PUT,PATCH,DELETE,HEAD'''
-      AllowHeaders: '''*'''
-      AllowOrigin:
-        Fn::Join:
-        - ''
-        - - '''https://app'
-          - .customergauge.com
-          - ''''
-      MaxAge: '''60'''
 Resources:
   AuthorizerLambda:
     Type: AWS::Serverless::Function
     Properties:
       Handler: src/authorizer/index.handler
       Runtime: nodejs10.x
-      CodeUri: s3://my-sample-lambda-authorizer/26e2dc41c4be3d8193e1a85c45934910
+      CodeUri: s3://my-sample-lambda-authorizer/6fe139f9c28911ac6824befdedb01088
       MemorySize: 512
       Timeout: 28
       Policies:
@@ -39,7 +30,7 @@ Resources:
     Properties:
       Handler: src/customers/index.handler
       Runtime: nodejs10.x
-      CodeUri: s3://my-sample-lambda-authorizer/26e2dc41c4be3d8193e1a85c45934910
+      CodeUri: s3://my-sample-lambda-authorizer/6fe139f9c28911ac6824befdedb01088
       MemorySize: 512
       Timeout: 28
       Policies:
@@ -57,12 +48,35 @@ Resources:
           Properties:
             Path: /customers/{proxy+}
             Method: ANY
+  NewLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/customers/index.handler
+      Runtime: nodejs10.x
+      CodeUri: s3://my-sample-lambda-authorizer/6fe139f9c28911ac6824befdedb01088
+      MemorySize: 512
+      Timeout: 28
+      Policies:
+      - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      - arn:aws:iam::aws:policy/AWSLambdaInvocation-DynamoDB
+      - arn:aws:iam::aws:policy/AWSLambdaExecute
+      Events:
+        NewResource:
+          Type: Api
+          Properties:
+            Path: /blah
+            Method: ANY
+        NewResourceWithProxy:
+          Type: Api
+          Properties:
+            Path: /blah/{proxy+}
+            Method: ANY
   OrganizationsLambda:
     Type: AWS::Serverless::Function
     Properties:
       Handler: src/customers/index.handler
       Runtime: nodejs10.x
-      CodeUri: s3://my-sample-lambda-authorizer/26e2dc41c4be3d8193e1a85c45934910
+      CodeUri: s3://my-sample-lambda-authorizer/6fe139f9c28911ac6824befdedb01088
       MemorySize: 512
       Timeout: 28
       Policies:
