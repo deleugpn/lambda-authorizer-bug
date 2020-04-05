@@ -1,0 +1,112 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: AWS Lambda for Augmentt Backend
+
+Globals:
+  Api:
+    EndpointConfiguration: REGIONAL
+    Auth:
+      Authorizers:
+        BasicAuthorizer:
+          FunctionArn: !GetAtt AuthorizerLambda.Arn
+          ReauthorizeEverySeconds: 30
+      DefaultAuthorizer: BasicAuthorizer
+    Cors:
+      AllowMethods: "'OPTIONS,GET,POST,PUT,PATCH,DELETE,HEAD'"
+      AllowHeaders: "'*'"
+      AllowOrigin:
+        Fn::Join:
+          - ''
+          - - "'https://app"
+            - ".customergauge.com"
+            - "'"
+      MaxAge: "'60'"
+
+Resources:
+
+  AuthorizerLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/authorizer/index.handler
+      Runtime: nodejs10.x
+      CodeUri: .
+      MemorySize: 512
+      Timeout: 28
+      Policies:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/AWSLambdaExecute
+
+  CustomersLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/customers/index.handler
+      Runtime: nodejs10.x
+      CodeUri: .
+      MemorySize: 512
+      Timeout: 28
+      Policies:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/AWSLambdaInvocation-DynamoDB
+        - arn:aws:iam::aws:policy/AWSLambdaExecute
+      Events:
+        CustomerResource:
+          Type: Api
+          Properties:
+            Path: /customers
+            Method: ANY
+        CustomerResourceWithProxy:
+          Type: Api
+          Properties:
+            Path: /customers/{proxy+}
+            Method: ANY
+
+  OrganizationsLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/customers/index.handler
+      Runtime: nodejs10.x
+      CodeUri: .
+      MemorySize: 512
+      Timeout: 28
+      Policies:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/AWSLambdaInvocation-DynamoDB
+        - arn:aws:iam::aws:policy/AWSLambdaExecute
+      Events:
+        OrganizationsResource:
+          Type: Api
+          Properties:
+            Path: /organizations
+            Method: ANY
+        OrganizationsResourceWithProxy:
+          Type: Api
+          Properties:
+            Path: /organizations/{proxy+}
+            Method: ANY
+
+  GatewayDomain:
+    Type: AWS::ApiGateway::DomainName
+    Properties:
+      EndpointConfiguration:
+        Types: [REGIONAL]
+      RegionalCertificateArn: !ImportValue WildcardCertificate
+      DomainName: test-lambda-auth.dta.customergauge.com
+
+  BasePathMapping:
+    Type: AWS::ApiGateway::BasePathMapping
+    DependsOn: [ServerlessRestApi]
+    Properties:
+      DomainName: !Ref GatewayDomain
+      RestApiId: !Ref ServerlessRestApi
+      Stage: Prod
+
+  ApiDomain:
+    Type: AWS::Route53::RecordSetGroup
+    Properties:
+      HostedZoneId: !ImportValue HostedZone
+      RecordSets:
+        - Name: test-lambda-auth.dta.customergauge.com
+          Type: A
+          AliasTarget:
+            DNSName: !GetAtt GatewayDomain.RegionalDomainName
+            HostedZoneId: !GetAtt GatewayDomain.RegionalHostedZoneId
